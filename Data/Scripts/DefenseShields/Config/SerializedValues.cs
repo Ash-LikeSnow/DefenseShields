@@ -25,6 +25,7 @@
         [ProtoMember(15), DefaultValue(-1)] public float MaintenanceCost = -1f;
         [ProtoMember(16), DefaultValue(-1)] public int DisableBlockDamage = -1;
         [ProtoMember(17), DefaultValue(-1)] public int DisableLineOfSight = -1;
+        [ProtoMember(18), DefaultValue(-1)] public float FlatHp = -1f;
     }
 
     [ProtoContract]
