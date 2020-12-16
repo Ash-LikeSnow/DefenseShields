@@ -40,11 +40,12 @@ namespace DefenseShields.Support
             const float MaintenanceCost = 0.5f;
             const int DisableBlockDamage = 0;
             const int DisableLineOfSight = 0;
+            const float FlatHp = 0f;
 
-            var dsCfgExists = MyAPIGateway.Utilities.FileExistsInGlobalStorage("DefenseShields.cfg");
+            var dsCfgExists = MyAPIGateway.Utilities.FileExistsInGlobalStorage("DS_Modified.cfg");
             if (dsCfgExists)
             {
-                var unPackCfg = MyAPIGateway.Utilities.ReadFileInGlobalStorage("DefenseShields.cfg");
+                var unPackCfg = MyAPIGateway.Utilities.ReadFileInGlobalStorage("DS_Modified.cfg");
                 var unPackedData = MyAPIGateway.Utilities.SerializeFromXML<DefenseShieldsEnforcement>(unPackCfg.ReadToEnd());
 
                 var invalidValue = unPackedData.HpsEfficiency <= 0 || unPackedData.BaseScaler < 1 || unPackedData.MaintenanceCost <= 0;
@@ -75,6 +76,8 @@ namespace DefenseShields.Support
                 Session.Enforced.MaintenanceCost = !unPackedData.MaintenanceCost.Equals(-1f) ? unPackedData.MaintenanceCost : MaintenanceCost;
                 Session.Enforced.DisableBlockDamage = !unPackedData.DisableBlockDamage.Equals(-1) ? unPackedData.DisableBlockDamage : DisableBlockDamage;
                 Session.Enforced.DisableLineOfSight = !unPackedData.DisableLineOfSight.Equals(-1) ? unPackedData.DisableLineOfSight : DisableLineOfSight;
+                Session.Enforced.FlatHp = !unPackedData.FlatHp.Equals(-1f) ? unPackedData.FlatHp : FlatHp;
+
                 if (unPackedData.Version <= 70)
                 {
                     Session.Enforced.CapScaler = 0.5f;
@@ -101,22 +104,23 @@ namespace DefenseShields.Support
                 Session.Enforced.Version = Version;
                 Session.Enforced.DisableBlockDamage = DisableBlockDamage;
                 Session.Enforced.DisableLineOfSight = DisableLineOfSight;
+                Session.Enforced.FlatHp = FlatHp;
 
                 WriteNewConfigFile();
 
-                Log.Line($"wrote new config file - file exists: {MyAPIGateway.Utilities.FileExistsInGlobalStorage("DefenseShields.cfg")}");
+                Log.Line($"wrote new config file - file exists: {MyAPIGateway.Utilities.FileExistsInGlobalStorage("DS_Modified.cfg")}");
             }
         }
 
         public static void ReadConfigFile()
         {
-            var dsCfgExists = MyAPIGateway.Utilities.FileExistsInGlobalStorage("DefenseShields.cfg");
+            var dsCfgExists = MyAPIGateway.Utilities.FileExistsInGlobalStorage("DS_Modified.cfg");
 
             if (Session.Enforced.Debug == 3) Log.Line($"Reading config, file exists? {dsCfgExists}");
 
             if (!dsCfgExists) return;
 
-            var cfg = MyAPIGateway.Utilities.ReadFileInGlobalStorage("DefenseShields.cfg");
+            var cfg = MyAPIGateway.Utilities.ReadFileInGlobalStorage("DS_Modified.cfg");
             var data = MyAPIGateway.Utilities.SerializeFromXML<DefenseShieldsEnforcement>(cfg.ReadToEnd());
             Session.Enforced = data;
 
@@ -725,18 +729,18 @@ namespace DefenseShields.Support
         {
             unPackCfg.Close();
             unPackCfg.Dispose();
-            MyAPIGateway.Utilities.DeleteFileInGlobalStorage("DefenseShields.cfg");
-            var newCfg = MyAPIGateway.Utilities.WriteFileInGlobalStorage("DefenseShields.cfg");
+            MyAPIGateway.Utilities.DeleteFileInGlobalStorage("DS_Modified.cfg");
+            var newCfg = MyAPIGateway.Utilities.WriteFileInGlobalStorage("DS_Modified.cfg");
             var newData = MyAPIGateway.Utilities.SerializeToXML(Session.Enforced);
             newCfg.Write(newData);
             newCfg.Flush();
             newCfg.Close();
-            Log.Line($"wrote modified config file - file exists: {MyAPIGateway.Utilities.FileExistsInGlobalStorage("DefenseShields.cfg")}");
+            Log.Line($"wrote modified config file - file exists: {MyAPIGateway.Utilities.FileExistsInGlobalStorage("DS_Modified.cfg")}");
         }
 
         private static void WriteNewConfigFile()
         {
-            var cfg = MyAPIGateway.Utilities.WriteFileInGlobalStorage("DefenseShields.cfg");
+            var cfg = MyAPIGateway.Utilities.WriteFileInGlobalStorage("DS_Modified.cfg");
             var data = MyAPIGateway.Utilities.SerializeToXML(Session.Enforced);
             cfg.Write(data);
             cfg.Flush();
