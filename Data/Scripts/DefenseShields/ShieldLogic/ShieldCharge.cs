@@ -222,22 +222,32 @@ namespace DefenseShields
 
             ShieldHpBase = ShieldMaxPower * bufferScaler;
 
+            var flatHp = Session.Enforced.FlatHp;
             var gridIntegrity = DsState.State.GridIntegrity * ConvToDec;
-            if (capScaler > 0)
-            {
-                if (fortify) capScaler *= 1.5f;
-                else if (ShieldMode == ShieldType.Station) capScaler *= 2f;
-                gridIntegrity *= capScaler;
-            }
 
-            if (ShieldHpBase > gridIntegrity) HpScaler = gridIntegrity / ShieldHpBase;
-            else HpScaler = 1f;
+            if (flatHp == 0)
+            {
+                if (capScaler > 0)
+                {
+                    if (fortify) capScaler *= 1.5f;
+                    else if (ShieldMode == ShieldType.Station) capScaler *= 2f;
+                    gridIntegrity *= capScaler;
+                }
+
+                if (ShieldHpBase > gridIntegrity) HpScaler = gridIntegrity / ShieldHpBase;
+                else HpScaler = 1f;
+
+                ShieldMaxCharge = ShieldHpBase * HpScaler;
+            }
+            else
+            {
+                ShieldMaxCharge = fortify ? flatHp * 0.015f / _shieldRatio : flatHp * 0.01f / _shieldRatio;
+            }
 
             shieldMaintainPercent = shieldMaintainPercent * DsState.State.EnhancerPowerMulti * (DsState.State.ShieldPercent * ConvToDec);
             if (DsState.State.Lowered) shieldMaintainPercent = shieldMaintainPercent * 0.25f;
             _shieldMaintaintPower = ShieldMaxPower * HpScaler * shieldMaintainPercent;
 
-            ShieldMaxCharge = ShieldHpBase * HpScaler;
             var powerForShield = PowerNeeded(chargePercent, hpsEfficiency);
             if (!WarmedUp) return;
 
