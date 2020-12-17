@@ -28,8 +28,8 @@ namespace DefenseShields.Support
             const float HeatScaler = 0.0065f;
             const float Unused = 0f;
             const int StationRatio = 1;
-            const int LargeShipRate = 1;
-            const int SmallShipRatio = 1;
+            const int LargeShipRate = 4;
+            const int SmallShipRatio = 8;
             const int DisableVoxel = 0;
             const int DisableEntityBarrier = 0;
             const int Debug = 1;
@@ -39,21 +39,22 @@ namespace DefenseShields.Support
             const float HpsEfficiency = 0.25f;
             const float MaintenanceCost = 0.5f;
             const int DisableBlockDamage = 0;
-            const int DisableLineOfSight = 0;
-            const float FlatHp = 0f;
+            const int DisableLineOfSight = 1;
+            const float FlatHp = 1000000f;
 
-            var dsCfgExists = MyAPIGateway.Utilities.FileExistsInGlobalStorage("DS_Modified.cfg");
+            var dsCfgExists = MyAPIGateway.Utilities.FileExistsInGlobalStorage("DS_OSGN.cfg");
             if (dsCfgExists)
             {
-                var unPackCfg = MyAPIGateway.Utilities.ReadFileInGlobalStorage("DS_Modified.cfg");
+                var unPackCfg = MyAPIGateway.Utilities.ReadFileInGlobalStorage("DS_OSGN.cfg");
                 var unPackedData = MyAPIGateway.Utilities.SerializeFromXML<DefenseShieldsEnforcement>(unPackCfg.ReadToEnd());
 
-                var invalidValue = unPackedData.HpsEfficiency <= 0 || unPackedData.BaseScaler < 1 || unPackedData.MaintenanceCost <= 0;
+                var invalidValue = unPackedData.HpsEfficiency <= 0 || unPackedData.BaseScaler < 1 || unPackedData.MaintenanceCost <= 0 || unPackedData.FlatHp < 0;
                 if (invalidValue)
                 {
                     if (unPackedData.HpsEfficiency <= 0) unPackedData.HpsEfficiency = HpsEfficiency;
                     if (unPackedData.BaseScaler < 1) unPackedData.BaseScaler = BaseScaler;
                     if (unPackedData.MaintenanceCost <= 0) unPackedData.MaintenanceCost = MaintenanceCost;
+                    if (unPackedData.FlatHp < 0) unPackedData.FlatHp = FlatHp;
                 }
 
                 if (unPackedData.Version == Version && !invalidValue) return;
@@ -108,19 +109,19 @@ namespace DefenseShields.Support
 
                 WriteNewConfigFile();
 
-                Log.Line($"wrote new config file - file exists: {MyAPIGateway.Utilities.FileExistsInGlobalStorage("DS_Modified.cfg")}");
+                Log.Line($"wrote new config file - file exists: {MyAPIGateway.Utilities.FileExistsInGlobalStorage("DS_OSGN.cfg")}");
             }
         }
 
         public static void ReadConfigFile()
         {
-            var dsCfgExists = MyAPIGateway.Utilities.FileExistsInGlobalStorage("DS_Modified.cfg");
+            var dsCfgExists = MyAPIGateway.Utilities.FileExistsInGlobalStorage("DS_OSGN.cfg");
 
             if (Session.Enforced.Debug == 3) Log.Line($"Reading config, file exists? {dsCfgExists}");
 
             if (!dsCfgExists) return;
 
-            var cfg = MyAPIGateway.Utilities.ReadFileInGlobalStorage("DS_Modified.cfg");
+            var cfg = MyAPIGateway.Utilities.ReadFileInGlobalStorage("DS_OSGN.cfg");
             var data = MyAPIGateway.Utilities.SerializeFromXML<DefenseShieldsEnforcement>(cfg.ReadToEnd());
             Session.Enforced = data;
 
@@ -729,18 +730,18 @@ namespace DefenseShields.Support
         {
             unPackCfg.Close();
             unPackCfg.Dispose();
-            MyAPIGateway.Utilities.DeleteFileInGlobalStorage("DS_Modified.cfg");
-            var newCfg = MyAPIGateway.Utilities.WriteFileInGlobalStorage("DS_Modified.cfg");
+            MyAPIGateway.Utilities.DeleteFileInGlobalStorage("DS_OSGN.cfg");
+            var newCfg = MyAPIGateway.Utilities.WriteFileInGlobalStorage("DS_OSGN.cfg");
             var newData = MyAPIGateway.Utilities.SerializeToXML(Session.Enforced);
             newCfg.Write(newData);
             newCfg.Flush();
             newCfg.Close();
-            Log.Line($"wrote modified config file - file exists: {MyAPIGateway.Utilities.FileExistsInGlobalStorage("DS_Modified.cfg")}");
+            Log.Line($"wrote modified config file - file exists: {MyAPIGateway.Utilities.FileExistsInGlobalStorage("DS_OSGN.cfg")}");
         }
 
         private static void WriteNewConfigFile()
         {
-            var cfg = MyAPIGateway.Utilities.WriteFileInGlobalStorage("DS_Modified.cfg");
+            var cfg = MyAPIGateway.Utilities.WriteFileInGlobalStorage("DS_OSGN.cfg");
             var data = MyAPIGateway.Utilities.SerializeToXML(Session.Enforced);
             cfg.Write(data);
             cfg.Flush();
