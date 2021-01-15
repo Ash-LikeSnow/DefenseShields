@@ -226,7 +226,8 @@
                         var mass = MyGrid.GetCurrentMass();
                         var sPhysics = Shield.CubeGrid.Physics;
                         var momentum = mass * sPhysics.GetVelocityAtPoint(collision.Value);
-                        var damage = (momentum.Length() / 500) * DsState.State.ModulateEnergy;
+                        var damage = (momentum.Length() / 500) * DsState.State.ModulateEnergy * 0.01f;
+                        //testing multiplier to nerf voxel collision damage
                         
                         var voxelEvent = Session.Instance.VoxelCollisionDmgPool.Get();
                         voxelEvent.Init(voxelBase, this, damage, collision.Value);
@@ -350,7 +351,8 @@
                     else return;
                     if (!_isServer) return;
 
-                    var damage = rawDamage * DsState.State.ModulateEnergy;
+                    var damage = rawDamage * DsState.State.ModulateEnergy * 0.05f;
+                    //added 0.05 multiplier to nerf collision damage
 
                     var blockEvent = Session.Instance.ManyBlocksPool.Get();
                     blockEvent.Init(cubeHitSet, this, damage, collisionAvg, breaching.EntityId);
